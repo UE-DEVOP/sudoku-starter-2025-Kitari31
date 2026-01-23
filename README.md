@@ -1,6 +1,7 @@
 # sudoku_starter
 
 Sudoku game
+Loan Vigouroux
 
 ## Getting Started
 
