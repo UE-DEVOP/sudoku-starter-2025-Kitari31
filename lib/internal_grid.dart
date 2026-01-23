@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudoku_api/sudoku_api.dart';
 
 class InternalGridBlock extends StatelessWidget {
   final int blockIndex;
@@ -6,6 +7,7 @@ class InternalGridBlock extends StatelessWidget {
   final int? selectedBlock;
   final int? selectedCell;
   final void Function(int blockIndex, int cellIndex) onCellTap;
+  final Puzzle puzzle;
 
   const InternalGridBlock({
     Key? key,
@@ -14,6 +16,7 @@ class InternalGridBlock extends StatelessWidget {
     required this.selectedBlock,
     required this.selectedCell,
     required this.onCellTap,
+    required this.puzzle,
   }) : super(key: key);
 
   @override
@@ -27,8 +30,13 @@ class InternalGridBlock extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
         children: List.generate(9, (cellIndex) {
+          // Récupération de la valeur depuis le puzzle
+          final value =
+              puzzle.board()?.matrix()?[blockIndex][cellIndex].getValue() ?? 0;
+
           final isSelected =
               blockIndex == selectedBlock && cellIndex == selectedCell;
+
           return Container(
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black, width: 0.3),
@@ -38,7 +46,12 @@ class InternalGridBlock extends StatelessWidget {
             ),
             child: InkWell(
               onTap: () => onCellTap(blockIndex, cellIndex),
-              child: const SizedBox.shrink(),
+              child: Center(
+                child: Text(
+                  value == 0 ? '' : value.toString(), // Affiche rien si 0
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
             ),
           );
         }),
