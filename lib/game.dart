@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:sudoku_api/sudoku_api.dart';
 import 'internal_grid_block.dart';
 
@@ -45,14 +46,37 @@ class _GameState extends State<Game> {
       return;
     }
 
-    // Conversion bloc/cell → row/col pour sudoku_api
+    // Conversion bloc/cell → row/col
     final row = (_selectedBlock! ~/ 3) * 3 + (_selectedCell! ~/ 3);
     final col = (_selectedBlock! % 3) * 3 + (_selectedCell! % 3);
-    final pos = Position(row: row, column: col);
 
-    setState(() {
-      _puzzle!.board()!.cellAt(pos).setValue(value);
-    });
+    // Valeur attendue
+    final expected =
+        _puzzle!.solvedBoard()?.matrix()?[row][col].getValue() ?? 0;
+
+    if (value == expected) {
+      // Bonne valeur → on met à jour la cellule
+      final pos = Position(row: row, column: col);
+      setState(() {
+        _puzzle!.board()!.cellAt(pos).setValue(value);
+      });
+    } else {
+      // Mauvaise valeur → afficher SnackBar d'erreur
+      const snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'Erreur',
+          message: 'Cette valeur n\'est pas correcte.',
+          contentType: ContentType.failure,
+        ),
+      );
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    }
   }
 
   Widget _buildNumberRow(List<int> values) {
