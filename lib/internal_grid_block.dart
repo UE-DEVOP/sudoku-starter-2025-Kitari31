@@ -34,11 +34,20 @@ class InternalGridBlock extends StatelessWidget {
           final row = (blockIndex ~/ 3) * 3 + (cellIndex ~/ 3);
           final col = (blockIndex % 3) * 3 + (cellIndex % 3);
 
+          // Valeur actuelle dans la grille
           final value =
               puzzle.board()?.matrix()?[row][col].getValue() ?? 0;
 
+          // Valeur attendue pour cette cellule
+          final expected =
+              puzzle.solvedBoard()?.matrix()?[row][col].getValue() ?? 0;
+
           final isSelected =
               blockIndex == selectedBlock && cellIndex == selectedCell;
+
+          // Affichage : si valeur vide → afficher valeur attendue en gris clair
+          final displayValue = value == 0 ? expected : value;
+          final isExpected = value == 0 && expected != 0;
 
           return Container(
             decoration: BoxDecoration(
@@ -51,8 +60,11 @@ class InternalGridBlock extends StatelessWidget {
               onTap: () => onCellTap(blockIndex, cellIndex),
               child: Center(
                 child: Text(
-                  value == 0 ? '' : value.toString(),
-                  style: const TextStyle(fontSize: 18),
+                  displayValue == 0 ? '' : displayValue.toString(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isExpected ? Colors.black12 : Colors.black,
+                  ),
                 ),
               ),
             ),
