@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sudoku_api/sudoku_api.dart';
-import 'internal_grid.dart';
+import 'internal_grid_block.dart';
 
 class Game extends StatefulWidget {
   const Game({Key? key, required this.title}) : super(key: key);
@@ -12,8 +12,8 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
-  Puzzle? _puzzle; // Le puzzle généré
-  bool _isLoading = true; // Indique si la génération est en cours
+  Puzzle? _puzzle;
+  bool _isLoading = true;
   int? _selectedBlock;
   int? _selectedCell;
 
@@ -40,6 +40,36 @@ class _GameState extends State<Game> {
     });
   }
 
+  void _enterValue(int value) {
+    if (_puzzle == null || _selectedBlock == null || _selectedCell == null) {
+      return;
+    }
+
+    // Conversion bloc/cell → row/col pour sudoku_api
+    final row = (_selectedBlock! ~/ 3) * 3 + (_selectedCell! ~/ 3);
+    final col = (_selectedBlock! % 3) * 3 + (_selectedCell! % 3);
+    final pos = Position(row: row, column: col);
+
+    setState(() {
+      _puzzle!.board()!.cellAt(pos).setValue(value);
+    });
+  }
+
+  Widget _buildNumberRow(List<int> values) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: values.map((value) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: ElevatedButton(
+            onPressed: () => _enterValue(value),
+            child: Text(value.toString()),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height / 2;
@@ -52,23 +82,32 @@ class _GameState extends State<Game> {
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()
-            : SizedBox(
-                width: boxSize * 3,
-                height: boxSize * 3,
-                child: GridView.count(
-                  crossAxisCount: 3,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: List.generate(9, (blockIndex) {
-                    return InternalGridBlock(
-                      blockIndex: blockIndex,
-                      boxSize: boxSize,
-                      selectedBlock: _selectedBlock,
-                      selectedCell: _selectedCell,
-                      onCellTap: _selectCell,
-                      puzzle: _puzzle!,
-                    );
-                  }),
-                ),
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: boxSize * 3,
+                    height: boxSize * 3,
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: List.generate(9, (blockIndex) {
+                        return InternalGridBlock(
+                          blockIndex: blockIndex,
+                          boxSize: boxSize,
+                          selectedBlock: _selectedBlock,
+                          selectedCell: _selectedCell,
+                          onCellTap: _selectCell,
+                          puzzle: _puzzle!,
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNumberRow([1, 2, 3, 4, 5]),
+                  const SizedBox(height: 8),
+                  _buildNumberRow([6, 7, 8, 9]),
+                ],
               ),
       ),
     );

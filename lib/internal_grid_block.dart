@@ -30,9 +30,12 @@ class InternalGridBlock extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
         children: List.generate(9, (cellIndex) {
-          // Récupération de la valeur depuis le puzzle
+          // Conversion bloc/cell → row/col
+          final row = (blockIndex ~/ 3) * 3 + (cellIndex ~/ 3);
+          final col = (blockIndex % 3) * 3 + (cellIndex % 3);
+
           final value =
-              puzzle.board()?.matrix()?[blockIndex][cellIndex].getValue() ?? 0;
+              puzzle.board()?.matrix()?[row][col].getValue() ?? 0;
 
           final isSelected =
               blockIndex == selectedBlock && cellIndex == selectedCell;
@@ -48,7 +51,7 @@ class InternalGridBlock extends StatelessWidget {
               onTap: () => onCellTap(blockIndex, cellIndex),
               child: Center(
                 child: Text(
-                  value == 0 ? '' : value.toString(), // Affiche rien si 0
+                  value == 0 ? '' : value.toString(),
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
