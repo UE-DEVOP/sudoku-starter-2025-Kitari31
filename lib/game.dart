@@ -60,6 +60,11 @@ class _GameState extends State<Game> {
       setState(() {
         _puzzle!.board()!.cellAt(pos).setValue(value);
       });
+
+      // Vérifier si la grille est terminée
+      if (_isSolved()) {
+        Navigator.pushReplacementNamed(context, '/end');
+      }
     } else {
       // Mauvaise valeur → afficher SnackBar d'erreur
       const snackBar = SnackBar(
@@ -77,6 +82,21 @@ class _GameState extends State<Game> {
         ..hideCurrentSnackBar()
         ..showSnackBar(snackBar);
     }
+  }
+
+  bool _isSolved() {
+    final board = _puzzle?.board()?.matrix();
+    final solved = _puzzle?.solvedBoard()?.matrix();
+    if (board == null || solved == null) return false;
+
+    for (var row = 0; row < 9; row++) {
+      for (var col = 0; col < 9; col++) {
+        if (board[row][col].getValue() != solved[row][col].getValue()) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   Widget _buildNumberRow(List<int> values) {
